@@ -52,7 +52,7 @@ export function LoginPanel() {
         </div>
       </form>
       <p className="mt-4 text-center">
-        Don&apos;t have an account?
+        Don&apos;t have an account?&nbsp;
         <Link className="text-blue-600 hover:underline dark:text-blue-400" href="#">
           Sign up
         </Link>

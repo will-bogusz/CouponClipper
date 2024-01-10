@@ -28,7 +28,9 @@ export default function Header() {
         </Link>
       </nav>
       <div className="flex gap-2">
-        <Button variant="outline">Login</Button>
+        <Link href="/login">
+          <Button variant="outline">Login</Button>
+        </Link>
         <Button>Sign Up</Button>
       </div>
     </header>
