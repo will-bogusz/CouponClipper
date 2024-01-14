@@ -1,9 +1,10 @@
-// this is the _app.tsx file
+// _app.tsx
 
 import { AppProps } from 'next/app';
-import Layout from '../src/components/component/Layout';
+import Layout from '@/components/component/Layout';
 import '../styles/globals.css';
 import { NextPageWithLayout } from './types';
+import { AuthProvider } from '@/components/context/AuthContext';
 
 interface MyAppProps extends AppProps {
     Component: NextPageWithLayout;
@@ -12,10 +13,12 @@ interface MyAppProps extends AppProps {
 function MyApp({ Component, pageProps }: MyAppProps) {
     const getLayout = Component.getLayout || ((page) => <Layout>{page}</Layout>);
 
-    return getLayout(<Component {...pageProps} />);
+    // Wrap the layout with AuthProvider
+    return (
+        <AuthProvider>
+            {getLayout(<Component {...pageProps} />)}
+        </AuthProvider>
+    );
 }
 
 export default MyApp;
-
-
-

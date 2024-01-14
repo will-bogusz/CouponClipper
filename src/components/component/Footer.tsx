@@ -46,7 +46,7 @@ export default function Footer() {
                 </div>
             </div>
             <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-12 border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p className="text-sm mb-4 md:mb-0">© Acme Inc. All rights reserved.</p>
+                <p className="text-sm mb-4 md:mb-0">© Primarch Solutions Ltd. All rights reserved.</p>
                 <div className="flex space-x-4">
                     <Link href="#">
                         <TwitterIcon className="h-6 w-6" />

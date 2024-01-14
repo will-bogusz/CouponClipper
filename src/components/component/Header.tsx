@@ -9,9 +9,9 @@ import React from "react";
 export default function Header() {
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-800">
-      <Link href="#">
+      <Link href="/">
         <MountainIcon className="h-6 w-6" />
-        <span className="sr-only">Acme Inc</span>
+        <span className="sr-only">Primarch Solutions</span>
       </Link>
       <nav className="flex gap-6">
         <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
@@ -31,7 +31,9 @@ export default function Header() {
         <Link href="/login">
           <Button variant="outline">Login</Button>
         </Link>
-        <Button>Sign Up</Button>
+        <Link href="/create">
+          <Button >Sign Up</Button>
+        </Link>
       </div>
     </header>
   )
