@@ -1,24 +1,46 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import { useAuth } from '../context/AuthContext';
 
 export function SignUpPanel() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+  const { login } = useAuth();
 
-  const handleSignUp = (event: { preventDefault: () => void; }) => {
+  const handleSignUp = async (event: { preventDefault: () => void; }) => {
     event.preventDefault();
 
-    if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return;
     }
 
-    // Add logic here for handling the actual sign up process
-    // e.g., sending data to a server
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
 
-    setPasswordError('');
+    try {
+      // Send POST request to your API route
+      const response = await axios.post('/api/signup', { email: username, password });
+      const { token } = response.data;
+
+      login({ token, username });
+
+      // Update UI or redirect as necessary
+      console.log('Sign up successful', token);
+      router.push('/');
+    } catch (error: any) {
+      // Handle errors, such as displaying a message to the user
+      setError(error?.response?.data?.error || 'Sign up failed');
+    }
+
+    setError('');
   };
 
   return (
@@ -66,7 +88,7 @@ export function SignUpPanel() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          {passwordError && <p className="text-red-500 text-xs">{passwordError}</p>}
+          {error && <p className="text-red-500 text-xs">{error}</p>}
         </div>
         <div>
           <button

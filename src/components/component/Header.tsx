@@ -5,8 +5,16 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import React from "react";
+import { useAuth } from '../context/AuthContext';
+import { AuthenticatedHeader } from './AuthenticatedHeader';
 
 export default function Header() {
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <AuthenticatedHeader />;
+  }
+
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-800">
       <Link href="/">
