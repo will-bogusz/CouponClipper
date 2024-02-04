@@ -1,10 +1,9 @@
-import Link from "next/link";
 import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 
-export function LoginPanel() {
+export function GroceryLoginPanel() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -59,9 +58,6 @@ export function LoginPanel() {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="password">
               Password
             </label>
-            <Link className="text-sm text-blue-600 hover:underline dark:text-blue-400" href="#">
-              Forgot your password?
-            </Link>
           </div>
           <input
             className="mt-1 w-full px-4 py-2 border rounded-md text-gray-700 dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700"
@@ -82,12 +78,6 @@ export function LoginPanel() {
           </button>
         </div>
       </form>
-      <p className="mt-4 text-center">
-        Don&apos;t have an account?&nbsp;
-        <Link className="text-blue-600 hover:underline dark:text-blue-400" href="/create">
-          Sign up
-        </Link>
-      </p>
     </div>
   );
 }

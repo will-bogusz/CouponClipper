@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import React from "react";
 import { useAuth } from '../context/AuthContext';
 import { AuthenticatedHeader } from './AuthenticatedHeader';
+import router from "next/router";
 
 export default function Header() {
   const { isAuthenticated } = useAuth();
@@ -17,10 +18,9 @@ export default function Header() {
 
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-800">
-      <Link href="/">
-        <MountainIcon className="h-6 w-6" />
-        <span className="sr-only">Primarch Solutions</span>
-      </Link>
+      <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push('/')}>
+        <span className="text-3xl font-bold">Clipwise</span>
+      </div>
       <nav className="flex gap-6">
         <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
           Home

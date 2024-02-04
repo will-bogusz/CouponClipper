@@ -2,12 +2,12 @@
 
 import { NextPageWithLayout } from './types';
 import Layout from '@/components/component/Layout';
-import { LoginPanel } from '@/components/component/LoginPanel';
+import { GroceryLoginPanel } from '@/components/component/GroceryLoginPanel';
 import { useAuth } from '@/components/context/AuthContext';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-const LoginPage: NextPageWithLayout = () => {
+const GroceryLoginPage: NextPageWithLayout = () => {
     const { isAuthenticated } = useAuth();
     const router = useRouter();
 
@@ -19,16 +19,16 @@ const LoginPage: NextPageWithLayout = () => {
 
     return (
         <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900" style={{ paddingBottom: '10%' }}>
-            <LoginPanel />
+            <GroceryLoginPanel />
         </div>
     );
 };
 
 
-LoginPage.getLayout = (page) => {
+GroceryLoginPage.getLayout = (page) => {
     return <Layout showHeader={false} showFooter={false} showMinHeader={true}>{page}</Layout>;
 };
 
-export default LoginPage;
+export default GroceryLoginPage;
 
 

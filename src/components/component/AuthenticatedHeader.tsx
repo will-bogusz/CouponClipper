@@ -28,11 +28,8 @@ export function AuthenticatedHeader() {
   
   return (
     <header className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800">
-      <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9">
-          <AvatarImage alt="@shadcn" src="/default-avatar.png" />
-          <AvatarFallback>?</AvatarFallback>
-        </Avatar>
+      <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push('/')}>
+        <span className="text-3xl font-bold">Clipwise</span>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -43,6 +40,8 @@ export function AuthenticatedHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => router.push('/dashboard')}>Dashboard</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Account Settings</DropdownMenuItem>
           <DropdownMenuSeparator />

@@ -7,6 +7,9 @@
  * this is //src/components/component/landing-page.tsx
 */
 
+// TODO: Update the flow of the website so that default page is the login/signup panel
+// TODO: Home page after login will be main user dashboard
+
 import Link from "next/link"
 
 export default function LandingPage() {

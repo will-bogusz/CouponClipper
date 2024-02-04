@@ -24,6 +24,14 @@ export default async function handler(
         const result = await db.collection('users').insertOne({
           email: req.body.email,
           password: hashedPassword,
+          linkedStores: [
+            {"storeName": "Kroger", "isLinked": false, "isActive": true},
+            {"storeName": "Food Lion", "isLinked": false, "isActive": true},
+            {"storeName": "Price Chopper", "isLinked": false, "isActive": false},
+            {"storeName": "HyVee", "isLinked": false, "isActive": false},
+            {"storeName": "Albertsons", "isLinked": false, "isActive": false},
+            {"storeName": "Safeway", "isLinked": false, "isActive": false}
+          ]
         });
         
         if (result) {
