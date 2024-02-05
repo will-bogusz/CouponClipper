@@ -1,39 +1,76 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import CircularProgress from '@mui/material/CircularProgress';
+import { encrypt } from '../../lib/serverUtils';
 
-export function GroceryLoginPanel() {
+export function KrogerLoginPanel() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const { user } = useAuth();
 
   const handleSubmit = async (event: { preventDefault: () => void; }) => {
     event.preventDefault();
+    setLoading(true);
     try {
-      // Send POST request to your API route
-      const response = await axios.post('/api/login', { email: username, password });
-      const { token } = response.data;
+      const response = await axios.post('/api/grocery/kroger', { email: username, password });
+      const { status } = response.data;
 
-      console.log('Token received:', token);
+      if (status === 'success') {
+        const encryptedPassword = encrypt(password, username);
+        if (!user) {
+          console.error('User is not authenticated');
+          setError('User is not authenticated. Please login.');
+          setLoading(false);
+          return;
+        }
 
-      // Use global state management to handle user authentication
-      // Assuming the token and username are all you need to store
-      login({ token, username });
+        await axios.post('/api/user/update', {
+          updates: [
+            {
+              field: 'linkedStores.$[elem].credentials.email',
+              value: username
+            },
+            {
+              field: 'linkedStores.$[elem].credentials.encryptedPassword',
+              value: encryptedPassword
+            },
+            {
+              field: 'linkedStores.$[elem].isLinked',
+              value: true
+            }
+          ]
+        }, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          data: {
+            arrayFilters: [{"elem.storeName": "Kroger"}]
+          }
+        });
 
-      // Redirect to home page on successful login
-      router.push('/dashboard');
+        router.push('/dashboard');
+      } else {
+        throw new Error('Login failed');
+      }
     } catch (error) {
-      // Handle errors here, such as displaying a message to the user
       console.error('Login failed', error);
       setError('Username/password incorrect!');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto mt-10 px-4 py-8 bg-white shadow-md rounded-md dark:bg-gray-800">
+      <div className="flex justify-center">
+        <img src="/logos/kroger.png" alt="Kroger Logo" className="w-32 h-32 object-contain" />
+      </div>
+      <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-4">Kroger</h1>
       <h2 className="text-2xl font-semibold text-center text-gray-700 dark:text-white">Login</h2>
       {error && <div className="mt-4 bg-red-200 text-red-700 p-2 rounded-md">
         <p className="text-sm">Invalid username or password. Please try again.</p>
@@ -54,11 +91,9 @@ export function GroceryLoginPanel() {
           />
         </div>
         <div>
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="password">
-              Password
-            </label>
-          </div>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="password">
+            Password
+          </label>
           <input
             className="mt-1 w-full px-4 py-2 border rounded-md text-gray-700 dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700"
             id="password"
@@ -69,16 +104,16 @@ export function GroceryLoginPanel() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div>
+        <div className="flex justify-center items-center">
           <button
             className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-blue-600 rounded-md hover:bg-blue-500 focus:outline-none focus:bg-blue-500"
             type="submit"
+            disabled={loading}
           >
-            Login
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
           </button>
         </div>
       </form>
     </div>
   );
 }
-

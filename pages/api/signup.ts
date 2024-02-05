@@ -25,19 +25,25 @@ export default async function handler(
           email: req.body.email,
           password: hashedPassword,
           linkedStores: [
-            {"storeName": "Kroger", "isLinked": false, "isActive": true},
-            {"storeName": "Food Lion", "isLinked": false, "isActive": true},
-            {"storeName": "Price Chopper", "isLinked": false, "isActive": false},
-            {"storeName": "HyVee", "isLinked": false, "isActive": false},
-            {"storeName": "Albertsons", "isLinked": false, "isActive": false},
-            {"storeName": "Safeway", "isLinked": false, "isActive": false}
+            {"storeName": "Kroger", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedPassword": ""}},
+            {"storeName": "Food Lion", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedPassword": ""}},
+            {"storeName": "Price Chopper", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}},
+            {"storeName": "HyVee", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}},
+            {"storeName": "Albertsons", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}},
+            {"storeName": "Safeway", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}}
           ]
         });
         
         if (result) {
+            if (!process.env.JWT_SECRET) {
+              console.error('JWT_SECRET is not defined in the environment variables.');
+              return res.status(500).json({ error: 'Internal Server Error due to misconfiguration.' });
+            }
+            // Adjusting the way to access the inserted document's ID based on MongoDB driver's behavior
+            const userId = result.insertedId.toString(); // Ensuring compatibility across different versions
             const token = jwt.sign(
-                { userId: result.insertedId, email: req.body.email },
-                process.env.JWT_SECRET as string,
+                { userId: userId, email: req.body.email },
+                process.env.JWT_SECRET,
                 { expiresIn: '8h' }
               );
               
