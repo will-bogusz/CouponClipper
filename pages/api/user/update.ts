@@ -33,11 +33,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Field or value missing' });
     }
 
-    // Update the requested data in the database
-    const updateResult = await db.collection('users').updateOne(
-      { _id: new ObjectId((decoded as jwt.JwtPayload).userId) },
-      { $set: { [field]: value } }
-    );
+    // Update the requested data in the database, including handling arrayFilters if provided
+    let updateResult;
+    if (req.body.arrayFilters) {
+      updateResult = await db.collection('users').updateOne(
+        { _id: new ObjectId((decoded as jwt.JwtPayload).userId) },
+        { $set: { [field]: value } },
+        { arrayFilters: req.body.arrayFilters }
+      );
+    } else {
+      updateResult = await db.collection('users').updateOne(
+        { _id: new ObjectId((decoded as jwt.JwtPayload).userId) },
+        { $set: { [field]: value } }
+      );
+    }
 
     if (updateResult.modifiedCount === 0) {
       return res.status(500).json({ error: 'Failed to update user data' });

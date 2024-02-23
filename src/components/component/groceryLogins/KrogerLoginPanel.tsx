@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import CircularProgress from '@mui/material/CircularProgress';
-import { encrypt } from '../../lib/serverUtils';
 
 export function KrogerLoginPanel() {
   const [username, setUsername] = useState('');
@@ -17,49 +16,67 @@ export function KrogerLoginPanel() {
     event.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/grocery/kroger', { email: username, password });
-      const { status } = response.data;
+      // Set a timeout of 180 seconds (3 minutes) to accommodate the API's potential response time
+      const source = axios.CancelToken.source();
+      const timeoutId = setTimeout(() => {
+        source.cancel(`Operation canceled due to timeout.`);
+      }, 180000); // 180 seconds timeout
+
+      const response = await axios.post('/api/grocery/kroger', { email: username, password }, { cancelToken: source.token, timeout: 180000 });
+      clearTimeout(timeoutId); // Clear the timeout if the request completes in time
+
+      const { status, message } = response.data;
 
       if (status === 'success') {
-        const encryptedPassword = encrypt(password, username);
-        if (!user) {
-          console.error('User is not authenticated');
-          setError('User is not authenticated. Please login.');
-          setLoading(false);
-          return;
-        }
+        // Use the /pages/api/user/encrypt.ts API to encrypt the password
+        try {
+          const encryptionResponse = await axios.post('/api/user/encrypt', { text: password, userSpecificElement: username });
+          const { iv, content } = encryptionResponse.data; // Destructuring to get iv and content from the encryption response
 
-        await axios.post('/api/user/update', {
-          updates: [
-            {
-              field: 'linkedStores.$[elem].credentials.email',
-              value: username
-            },
-            {
-              field: 'linkedStores.$[elem].credentials.encryptedPassword',
-              value: encryptedPassword
-            },
-            {
-              field: 'linkedStores.$[elem].isLinked',
-              value: true
-            }
-          ]
-        }, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-          data: {
-            arrayFilters: [{"elem.storeName": "Kroger"}]
+          if (!user) {
+            console.error('User is not authenticated');
+            setError('User is not authenticated. Please login.');
+            setLoading(false);
+            return;
           }
-        });
 
-        router.push('/dashboard');
+          await axios.post('/api/user/update', {
+            updates: [
+              {
+                field: 'linkedStores.$[elem].credentials',
+                value: {
+                  email: username,
+                  encryptedCredentials: {
+                    iv: iv,
+                    content: content
+                  }
+                }
+              },
+              {
+                field: 'linkedStores.$[elem].isLinked',
+                value: true
+              }
+            ],
+            arrayFilters: [{"elem.storeName": "Kroger"}]
+          }, {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            }
+          });
+
+          router.push('/dashboard');
+        } catch (encryptionError) {
+          console.error('Encryption failed', encryptionError);
+          setError('Failed to encrypt password. Please try again later.');
+          setLoading(false);
+        }
       } else {
-        throw new Error('Login failed');
+        console.error('Login failed', message);
+        setError(message);
       }
     } catch (error) {
       console.error('Login failed', error);
-      setError('Username/password incorrect!');
+      setError('An unexpected error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 // this is the create.tsx file
 
-import { NextPageWithLayout } from './types';
+import { NextPageWithLayout } from '../src/components/lib/types';
 import Layout from '@/components/component/Layout';
 import { SignUpPanel } from '@/components/component/SignUpPanel';
 import { useAuth } from '@/components/context/AuthContext';

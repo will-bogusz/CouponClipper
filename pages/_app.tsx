@@ -3,7 +3,7 @@
 import { AppProps } from 'next/app';
 import Layout from '@/components/component/Layout';
 import '../styles/globals.css';
-import { NextPageWithLayout } from './types';
+import { NextPageWithLayout } from '../src/components/lib/types';
 import { AuthProvider } from '@/components/context/AuthContext';
 
 interface MyAppProps extends AppProps {

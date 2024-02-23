@@ -1,4 +1,4 @@
-import { NextPageWithLayout } from './types';
+import { NextPageWithLayout } from '../src/components/lib/types';
 import Layout from '@/components/component/Layout';
 import { KrogerLoginPanel } from '@/components/component/groceryLogins/KrogerLoginPanel';
 import { FoodLionLoginPanel } from '@/components/component/groceryLogins/FoodLionLoginPanel';
@@ -11,16 +11,16 @@ const GroceryLoginPage: NextPageWithLayout = () => {
     const { user } = useAuth();
     const router = useRouter();
     const { query } = useRouter();
-    const { company } = query;
+    const company = query.company as string | undefined;
 
     // function to normalize company names for comparison
-    const normalizeCompanyName = (name: string) => {
-        return name.replace(/\s+/g, '').toLowerCase();
+    const normalizeCompanyName = (name: string | undefined) => {
+        return name ? name.replace(/\s+/g, '').toLowerCase() : '';
     };
 
     useEffect(() => {
         const checkCompanyStatus = async () => {
-            if (!user || !user.token) return;
+            if (!user || !user.token || !company) return;
             try {
                 const response = await axios.post('/api/user/data', 
                     {
@@ -33,7 +33,7 @@ const GroceryLoginPage: NextPageWithLayout = () => {
                     }
                 );
                 const linkedStores = response.data.linkedStores;
-                const currentCompany = linkedStores.find((store: { storeName: string; }) => normalizeCompanyName(store.storeName) === normalizeCompanyName(company as string));
+                const currentCompany = linkedStores.find((store: { storeName: string; }) => normalizeCompanyName(store.storeName) === normalizeCompanyName(company));
                 if (currentCompany && (currentCompany.isActive === false || currentCompany.isLinked === true)) {
                     router.push('/dashboard');
                 }
@@ -46,7 +46,7 @@ const GroceryLoginPage: NextPageWithLayout = () => {
     }, [user, company, router]);
 
     const renderLoginPanel = () => {
-        const normalizedCompany = normalizeCompanyName(company as string);
+        const normalizedCompany = normalizeCompanyName(company);
         switch (normalizedCompany) {
             case 'kroger':
                 return <KrogerLoginPanel />;

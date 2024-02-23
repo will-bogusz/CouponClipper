@@ -1,6 +1,6 @@
 // this is the login.tsx file
 
-import { NextPageWithLayout } from './types';
+import { NextPageWithLayout } from '../src/components/lib/types';
 import Layout from '@/components/component/Layout';
 import { LoginPanel } from '@/components/component/LoginPanel';
 import { useAuth } from '@/components/context/AuthContext';

@@ -1,6 +1,6 @@
 // this is the index.tsx file
 
-import { NextPageWithLayout } from './types';
+import { NextPageWithLayout } from '../src/components/lib/types';
 import Layout from '../src/components/component/Layout';
 import LandingPage from '../src/components/component/LandingPage';
 

@@ -1,13 +1,11 @@
+// src/components/component/lib/serverUtils.ts
 import crypto from 'crypto';
 
 const algorithm = 'aes-256-ctr';
-const baseKey = process.env.ENCRYPTION_KEY; // Base key stored securely
+const baseKey = process.env.ENCRYPTION_KEY as string; // Base key stored securely
 
 // Function to create a unique encryption key for each user
-const createUserSpecificKey = (baseKey: string | undefined, userSpecificElement: any) => {
-  if (typeof baseKey === 'undefined') {
-    throw new Error('Base encryption key is undefined. Please set the ENCRYPTION_KEY environment variable.');
-  }
+export const createUserSpecificKey = (baseKey: string, userSpecificElement: any) => {
   // Use a hash function to combine the base key with the user-specific element
   const hash = crypto.createHash('sha256');
   hash.update(`${baseKey}${userSpecificElement}`);
@@ -34,7 +32,7 @@ export const encrypt = (text: crypto.BinaryLike, userSpecificElement: any) => {
   };
 };
 
-const decrypt = (hash: { iv: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }; content: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }; }, userSpecificElement: any) => {
+export const decrypt = (hash: { iv: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }; content: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }; }, userSpecificElement: any) => {
   try {
     const key = createUserSpecificKey(baseKey, userSpecificElement);
     const iv = Buffer.from(hash.iv, 'hex');

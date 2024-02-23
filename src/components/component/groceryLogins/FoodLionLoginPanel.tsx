@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import CircularProgress from '@mui/material/CircularProgress';
-import { encrypt } from '../../lib/serverUtils';
 
 export function FoodLionLoginPanel() {
   const [username, setUsername] = useState('');
@@ -17,51 +16,72 @@ export function FoodLionLoginPanel() {
     event.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/grocery/foodlion', { email: username, password });
-      const { status } = response.data;
+      // Set a timeout of 180 seconds (3 minutes) to accommodate the API's potential response time
+      const source = axios.CancelToken.source();
+      const timeoutId = setTimeout(() => {
+        source.cancel(`Operation canceled due to timeout.`);
+      }, 300000); // 180 seconds timeout
+
+      const response = await axios.post('/api/grocery/foodlion', { email: { username }, password: { password }, mode: "scrape" }, { cancelToken: source.token, timeout: 300000 });
+      clearTimeout(timeoutId); // Clear the timeout if the request completes in time
+
+      console.log('Response:', response);
+
+      const { status, message } = response.data;
+      // log response data
+      console.log(response.data);
 
       if (status === 'success') {
-        // Encrypt the password before sending it for login
-        const encryptedPassword = encrypt(password, username);
-        if (!user) {
-          console.error('User is not authenticated');
-          setError('User is not authenticated. Please login.');
-          setLoading(false);
-          return;
-        }
+        // Use the /pages/api/user/encrypt.ts API to encrypt the password
+        try {
+          const encryptionResponse = await axios.post('/api/user/encrypt', { text: password, userSpecificElement: username });
+          const { iv, content } = encryptionResponse.data; // Destructuring to get iv and content from the encryption response
 
-        // Update the user's credentials for Food Lion in the linkedStores array
-        await axios.post('/api/user/update', {
-          updates: [
-            {
-              field: 'linkedStores.$[elem].credentials.email',
-              value: username
-            },
-            {
-              field: 'linkedStores.$[elem].credentials.encryptedPassword',
-              value: encryptedPassword
-            },
-            {
-              field: 'linkedStores.$[elem].isLinked',
-              value: true
-            }
-          ]
-        }, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-          data: {
-            arrayFilters: [{"elem.storeName": "Food Lion"}]
+          if (!user) {
+            console.error('User is not authenticated');
+            setError('User is not authenticated. Please login.');
+            setLoading(false);
+            return;
           }
-        });
 
-        router.push('/dashboard');
+          await axios.post('/api/user/update', {
+            field: "linkedStores.$[elem].credentials",
+            value: {
+              email: username,
+              encryptedCredentials: {
+                iv: iv,
+                content: content
+              }
+            },
+            arrayFilters: [{"elem.storeName": "Food Lion"}]
+          }, {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            }
+          });
+          await axios.post('/api/user/update', {
+            field: "linkedStores.$[elem].isLinked",
+            value: true,
+            arrayFilters: [{"elem.storeName": "Food Lion"}]
+          }, {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            }
+          });
+
+          router.push('/dashboard');
+        } catch (encryptionError) {
+          console.error('Encryption failed', encryptionError);
+          setError('Failed to encrypt password. Please try again later.');
+          setLoading(false);
+        }
       } else {
-        throw new Error('Login failed');
+        console.error('Login failed', message);
+        setError(message);
       }
     } catch (error) {
       console.error('Login failed', error);
-      setError('Username/password incorrect!');
+      setError('An unexpected error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +95,7 @@ export function FoodLionLoginPanel() {
       <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-4">Food Lion</h1>
       <h2 className="text-2xl font-semibold text-center text-gray-700 dark:text-white">Login</h2>
       {error && <div className="mt-4 bg-red-200 text-red-700 p-2 rounded-md">
-        <p className="text-sm">Invalid username or password. Please try again.</p>
+        <p className="text-sm">{error}</p>
       </div>}
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div>

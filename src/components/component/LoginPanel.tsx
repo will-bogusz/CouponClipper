@@ -18,7 +18,7 @@ export function LoginPanel() {
       const response = await axios.post('/api/login', { email: username, password });
       const { token } = response.data;
 
-      console.log('Token received:', token);
+      //console.log('Token received:', token);
 
       // Use global state management to handle user authentication
       // Assuming the token and username are all you need to store

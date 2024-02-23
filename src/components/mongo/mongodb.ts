@@ -1,6 +1,6 @@
 import { MongoClient, MongoClientOptions } from 'mongodb';
 
-// src/components/mongo/mongodb.tsx
+// src/components/component/mongo/mongodb.tsx
 
 const uri = process.env.MONGODB_URI as string;
 

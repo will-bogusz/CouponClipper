@@ -25,12 +25,12 @@ export default async function handler(
           email: req.body.email,
           password: hashedPassword,
           linkedStores: [
-            {"storeName": "Kroger", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedPassword": ""}},
-            {"storeName": "Food Lion", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedPassword": ""}},
-            {"storeName": "Price Chopper", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}},
-            {"storeName": "HyVee", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}},
-            {"storeName": "Albertsons", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}},
-            {"storeName": "Safeway", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedPassword": ""}}
+            {"storeName": "Kroger", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
+            {"storeName": "Food Lion", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
+            {"storeName": "Price Chopper", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
+            {"storeName": "HyVee", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
+            {"storeName": "Albertsons", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
+            {"storeName": "Safeway", "isLinked": false, "isActive": false, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}}
           ]
         });
         
