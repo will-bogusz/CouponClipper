@@ -22,7 +22,7 @@ export function FoodLionLoginPanel() {
         source.cancel(`Operation canceled due to timeout.`);
       }, 300000); // 180 seconds timeout
 
-      const response = await axios.post('/api/grocery/foodlion', { email: { username }, password: { password }, mode: "scrape" }, { cancelToken: source.token, timeout: 300000 });
+      const response = await axios.post('/api/grocery/foodlion', { email: { username }, password: { password }, mode: "validate" }, { cancelToken: source.token, timeout: 300000 });
       clearTimeout(timeoutId); // Clear the timeout if the request completes in time
 
       console.log('Response:', response);

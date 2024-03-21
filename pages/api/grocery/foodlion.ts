@@ -1,7 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 
+// TODO: add a mode for activating the monthly offers
+// since it is unreasonably expensive to redeem coupons continually, we will only want to 
+// schedule the mothly offer activation, and perhaps allow a manual request activation for the coupons
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // // check for localhost IP (IPv4 or IPv6)
+  // const sourceIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // if (sourceIp !== '127.0.0.1' && sourceIp !== '::1') {
+  //   // not from localhost, reject the request
+  //   return res.status(403).json({ status: 'failure', message: 'Access denied' });
+  // }
+  
   const { email, password, mode } = req.body;
   const emailToPass = email.username;
   const passwordToPass = password.password;
@@ -210,35 +221,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       let clippedCouponsCount = 0;
       for (const coupon of coupons) {
         let clipPayload = JSON.stringify({ couponId: coupon.id });
-        try {
-          console.log(`Attempting to clip coupon ${coupon.id}`);
-          const response = await fetch(clipUrl, {
-            method: 'POST',
-            body: clipPayload
-          });
-          let dataText = await response.text();
-          let data;
+        let attempts = 0;
+        let clipSuccess = false;
+        while (attempts < 2 && !clipSuccess) {
           try {
-            data = JSON.parse(dataText);
-            data = JSON.parse(data.result.content); // Adjusted to parse the wrapper
+            console.log(`Attempting to clip coupon ${coupon.id}, attempt ${attempts + 1}`);
+            const response = await fetch(clipUrl, {
+              method: 'POST',
+              body: clipPayload
+            });
+            let dataText = await response.text();
+            let data;
+            try {
+              data = JSON.parse(dataText);
+              data = JSON.parse(data.result.content); // adjusted to parse the wrapper
+            } catch (error) {
+              console.error(`Failed to parse clip response for coupon ${coupon.id} as JSON:`, error);
+              attempts++;
+              continue;
+            }
+            console.log(`Clip response for coupon ${coupon.id}:`, data);
+            if (data.response && data.response.result === "SUCCESS") {
+              console.log(`Coupon ${coupon.id} clipped successfully.`);
+              clippedCouponsCount++;
+              clipSuccess = true;
+            } else {
+              console.log(`Failed to clip coupon ${coupon.id}, attempt ${attempts + 1}.`);
+              attempts++;
+            }
           } catch (error) {
-            console.error(`Failed to parse clip response for coupon ${coupon.id} as JSON:`, error);
-            continue;
+            console.log(`Error clipping coupon ${coupon.id}, attempt ${attempts + 1}:`, error);
+            attempts++;
           }
-          console.log(`Clip response for coupon ${coupon.id}:`, data);
-          if (data.response && data.response.result === "SUCCESS") {
-            console.log(`Coupon ${coupon.id} clipped successfully.`);
-            clippedCouponsCount++;
-          } else {
-            console.log(`Failed to clip coupon ${coupon.id}.`);
-          }
-        } catch (error) {
-          console.log(`Error clipping coupon ${coupon.id}:`, error);
         }
       }
 
       console.log(`Total coupons clipped: ${clippedCouponsCount}`);
-      res.status(200).json({ status: 'success', message: `Scraping and coupon redemption successful. Total coupons clipped: ${clippedCouponsCount}` });
+      res.status(200).json({ status: 'success', message: `Scraping and coupon redemption successful. Total coupons clipped: ${clippedCouponsCount}`, clipped: clippedCouponsCount });
       return;
     }
   } else if (responseCode === "LOGIN_INVALID") {
