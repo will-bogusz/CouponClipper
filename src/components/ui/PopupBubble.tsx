@@ -1,49 +1,22 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface PopupBubbleProps {
+  id: number;
   message: string;
   type: 'success' | 'error';
+  removeMessage: (id: number) => void;
 }
 
-const PopupBubble: React.FC<PopupBubbleProps> = ({ message, type }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [opacity, setOpacity] = useState(1);
-  const messageRef = useRef(message);
-
+const PopupBubble: React.FC<PopupBubbleProps> = ({ id, message, type, removeMessage }) => {
   useEffect(() => {
-    if (message) {
-      setIsVisible(true);
-      setOpacity(1); // reset opacity to full whenever a new message is received
-      messageRef.current = message;
-    }
-
-    let fadeOutInterval: string | number | NodeJS.Timeout | undefined;
-    const startFadeOut = () => {
-      fadeOutInterval = setInterval(() => {
-        setOpacity((prevOpacity) => {
-          if (prevOpacity <= 0) {
-            clearInterval(fadeOutInterval);
-            setIsVisible(false);
-            return 0;
-          }
-          return prevOpacity - 0.05; // decrease opacity gradually
-        });
-      }, 100); // adjust opacity every 100ms for a smoother fade
-    };
-    const fadeOutTimer = setTimeout(startFadeOut, 3000); // start fading out after 3 seconds
-
-    return () => {
-      clearTimeout(fadeOutTimer);
-      clearInterval(fadeOutInterval); // ensure interval is cleared on component unmount
-    };
-  }, [message]);
-
-  if (!isVisible) return null;
+    const timer = setTimeout(() => removeMessage(id), 5000); // Adjust time as needed
+    return () => clearTimeout(timer);
+  }, [id, removeMessage]);
 
   return (
-    <div 
-      className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transition-opacity duration-6000 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}
-      style={{ opacity: opacity }}
+    <div
+      className={`p-4 mb-2 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}
+      style={{ opacity: 1, transition: 'opacity 0.5s ease-out' }}
     >
       {message}
     </div>

@@ -27,13 +27,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log(`attempt ${attempts + 1} to fetch data from URL: ${url}`);
         const response = await fetch(url, options);
         if (response.ok) {
-          const jsonResponse = await response.json();
-          if (jsonResponse.success) {
+          // making a shallow copy of the response to avoid "body used already for" error
+          const clonedResponse = response.clone();
+          const jsonResponse = await clonedResponse.json();
+          if (jsonResponse.result.success) {
             console.log(`fetch attempt ${attempts + 1} successful.`);
             return response;
           } else {
-            console.log(`fetch attempt ${attempts + 1} encountered an error: ${jsonResponse.error}`);
-            throw new Error(`API error: ${jsonResponse.error}`);
+            console.log(`fetch attempt ${attempts + 1} encountered an error: ${jsonResponse.result.error}`);
+            throw new Error(`API error: ${jsonResponse.result.error}`);
           }
         } else {
           console.log(`fetch attempt ${attempts + 1} failed with response status: ${response.status}`);

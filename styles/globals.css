@@ -25,3 +25,13 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.popup-stack {
+  position: fixed;
+  bottom: 1rem; /* Distance from bottom */
+  right: 1rem; /* Distance from right */
+  display: flex;
+  flex-direction: column-reverse; /* Stack from bottom to top */
+  align-items: flex-end; /* Align to the right side */
+  gap: 0.5rem; /* Space between popups */
+}
