@@ -24,26 +24,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let attempts = 0;
     while (attempts < maxAttempts) {
       try {
-        console.log(`Attempt ${attempts + 1} to fetch data from URL: ${url}`);
+        console.log(`attempt ${attempts + 1} to fetch data from URL: ${url}`);
         const response = await fetch(url, options);
         if (response.ok) {
-          console.log(`Fetch attempt ${attempts + 1} successful.`);
-          return response;
+          const jsonResponse = await response.json();
+          if (jsonResponse.success) {
+            console.log(`fetch attempt ${attempts + 1} successful.`);
+            return response;
+          } else {
+            console.log(`fetch attempt ${attempts + 1} encountered an error: ${jsonResponse.error}`);
+            throw new Error(`API error: ${jsonResponse.error}`);
+          }
+        } else {
+          console.log(`fetch attempt ${attempts + 1} failed with response status: ${response.status}`);
+          throw new Error('response not OK');
         }
-        console.log(`Fetch attempt ${attempts + 1} failed with response status: ${response.status}`);
-        throw new Error('Response not OK');
       } catch (error) {
-        console.log(`Fetch attempt ${attempts + 1} failed with error: ${error}`);
+        console.log(`fetch attempt ${attempts + 1} failed with error: ${error}`);
         attempts++;
         if (attempts >= maxAttempts) {
-          console.log(`Max fetch attempts reached for URL: ${url}`);
-          throw new Error('Max fetch attempts reached');
+          console.log(`max fetch attempts reached for URL: ${url}`);
+          throw new Error('max fetch attempts reached');
         }
       }
     }
   }
 
-  const url = `https://api.scrapfly.io/scrape?retry=false&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2F`;
+  const url = `https://api.scrapfly.io/scrape?retry=true&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2F`;
   try {
     await attemptFetch(url); // Just to prime the session, no need to handle the response
   } catch (error) {
@@ -52,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const loginUrl = `https://api.scrapfly.io/scrape?retry=false&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv6.0%2Fuser%2Fguest%2Ftransfer&headers[Content-Type]=application%2Fjson%3Bcharset%3DUTF-8`;
+  const loginUrl = `https://api.scrapfly.io/scrape?retry=true&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv6.0%2Fuser%2Fguest%2Ftransfer&headers[Content-Type]=application%2Fjson%3Bcharset%3DUTF-8`;
   const loginPayload = JSON.stringify({ loginName: emailToPass, password: passwordToPass });
   const loginOptions = {
     method: 'PUT',
@@ -93,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(200).json({ status: 'success', message: 'Login successful' });
       return;
     } else if (mode === 'scrape') {
-      const userUrl = `https://api.scrapfly.io/scrape?retry=false&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv1.0%2Fcurrent%2Fuser`;
+      const userUrl = `https://api.scrapfly.io/scrape?retry=true&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv1.0%2Fcurrent%2Fuser`;
 
       let userDataResponse;
       try {
@@ -127,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const userId = userData.userId;
       console.log('User ID:', userId);
 
-      const profileUrl = `https://api.scrapfly.io/scrape?retry=false&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv4.0%2Fuser%2F${userId}%2Fprofile`;
+      const profileUrl = `https://api.scrapfly.io/scrape?retry=true&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv4.0%2Fuser%2F${userId}%2Fprofile`;
 
       let profileResponse, cardNumber;
       try {
@@ -166,7 +173,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return;
       }
 
-      const couponUrl = `https://api.scrapfly.io/scrape?retry=false&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv7.0%2Fcoupons%2Fusers%2F${userId}%2Fprism%2Fservice-locations%2F50000806%2Fcoupons%2Fsearch%3FfullDocument%3Dtrue%26unwrap%3Dtrue&headers[Content-Type]=application%2Fjson%3Bcharset%3DUTF-8`;
+      const couponUrl = `https://api.scrapfly.io/scrape?retry=true&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%3A%2F%2Ffoodlion.com%2Fapi%2Fv7.0%2Fcoupons%2Fusers%2F${userId}%2Fprism%2Fservice-locations%2F50000806%2Fcoupons%2Fsearch%3FfullDocument%3Dtrue%26unwrap%3Dtrue&headers[Content-Type]=application%2Fjson%3Bcharset%3DUTF-8`;
 
       let coupons: {id: string, clipped: boolean}[] = [];
       let start = 0;
@@ -216,7 +223,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       } while (start < total);
 
-      const clipUrl = `https://api.scrapfly.io/scrape?retry=false&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%253A%252F%252Ffoodlion.com%252Fapi%252Fv6.0%252Fusers%252F${userId}%252Fcoupons%252Fclipped&headers[Content-Type]=application%2Fjson%3Bcharset%3DUTF-8`;
+      const clipUrl = `https://api.scrapfly.io/scrape?retry=true&tags=player%2Cproject%3Adefault&session=${sessionName}&proxy_pool=public_residential_pool&country=us&lang=en&asp=true&key=${apiKey}&url=https%253A%252F%252Ffoodlion.com%252Fapi%252Fv6.0%252Fusers%252F${userId}%252Fcoupons%252Fclipped&headers[Content-Type]=application%2Fjson%3Bcharset%3DUTF-8`;
 
       let clippedCouponsCount = 0;
       for (const coupon of coupons) {

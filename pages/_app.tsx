@@ -5,6 +5,7 @@ import Layout from '@/components/component/Layout';
 import '../styles/globals.css';
 import { NextPageWithLayout } from '../src/components/lib/types';
 import { AuthProvider } from '@/components/context/AuthContext';
+import { PopupProvider } from '@/components/context/PopupContext';
 
 interface MyAppProps extends AppProps {
     Component: NextPageWithLayout;
@@ -13,10 +14,12 @@ interface MyAppProps extends AppProps {
 function MyApp({ Component, pageProps }: MyAppProps) {
     const getLayout = Component.getLayout || ((page) => <Layout>{page}</Layout>);
 
-    // Wrap the layout with AuthProvider
+    // Wrap the layout with AuthProvider and PopupProvider
     return (
         <AuthProvider>
-            {getLayout(<Component {...pageProps} />)}
+            <PopupProvider>
+                {getLayout(<Component {...pageProps} />)}
+            </PopupProvider>
         </AuthProvider>
     );
 }

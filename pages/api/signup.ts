@@ -24,6 +24,7 @@ export default async function handler(
         const result = await db.collection('users').insertOne({
           email: req.body.email,
           password: hashedPassword,
+          lastSynced: "",
           linkedStores: [
             {"storeName": "Kroger", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
             {"storeName": "Food Lion", "isLinked": false, "isActive": true, "credentials": {"email": "", "encryptedCredentials": {"iv": "", "content": ""}}},
